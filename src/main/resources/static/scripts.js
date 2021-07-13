@@ -2,20 +2,23 @@ var stompClient = null;
 
 $(document).ready(function() {
     console.log("Index page is ready");
-    connect();
+
+    $("#connect").click(function() {
+    	connect($("#username").val());
+    });
 
     $("#send").click(function() {
         sendMessage();
     });
 });
 
-function connect() {
-    var socket = new SockJS('/websocket');
+function connect(username) {
+    var socket = new SockJS('/hello');
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
+    stompClient.connect({ username: username, }, function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/messages', function (message) {
-            showMessage(JSON.parse(message.body).content);
+        stompClient.subscribe('/users/queue/messages', function (message) {
+            showMessage(message);
         });
     });
 }
@@ -26,5 +29,5 @@ function showMessage(message) {
 
 function sendMessage() {
     console.log("sending message");
-    stompClient.send("/ws/message", {}, JSON.stringify({'messageContent': $("#message").val()}));
+    stompClient.send("/app/hello", {}, $("#message").val());
 }
